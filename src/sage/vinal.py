@@ -58,7 +58,7 @@ class VinAl:
         s.W=[s.V(w) for w in GetIntegerPoints(s.V1.matrix().insert_row(s.n-1, s.v0))] # w_1..w_m
         s.W.sort(key = lambda x: -s.v0.inner_product(x))
 
-        s.En=abs(s.M.det()/GCD_list(s.M.adjoint().list()))
+        s.En=abs(s.M.det()/GCD_list(s.M.adjugate().list()))
         s.root_lengths = [k for k in range(1,2*s.En+1) if ((2*s.En)%k == 0)]
 
         #print([v0.inner_product(w) for w in W])

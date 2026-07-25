@@ -109,7 +109,7 @@ class VinAl:
             return all(q*s.M*q.transpose()<=0 for q in polycone)
     
     #@timeit
-    def FindRoots(s, max_roots=None, max_decompositions=None):
+    def FindRoots(s, max_roots=None, max_decompositions=None, progress=None):
         """Enumerate roots until the fundamental polyhedron closes, or a bound is hit.
 
         Returns True when the polyhedron was established (the algorithm's own
@@ -126,7 +126,7 @@ class VinAl:
         s.roots = s.FundCone()
         s.complete = False
         s.truncated = False
-        for root in s.NextRoot(max_decompositions):
+        for root in s.NextRoot(max_decompositions, progress):
             s.roots.append(root)
             if s.is_FundPoly():
                 s.print_roots()
@@ -211,10 +211,12 @@ class VinAl:
             if stop == 0:
                 return
 
-    def NextRoot(s, max_decompositions=None):
+    def NextRoot(s, max_decompositions=None, progress=None):
       examined = 0
       for a, k in s.IterateRootDecompositions():
         examined += 1
+        if progress is not None:
+            progress(examined, len(s.roots))
         if max_decompositions is not None and examined > max_decompositions:
             s.truncated = True
             return

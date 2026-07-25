@@ -109,14 +109,34 @@ class VinAl:
             return all(q*s.M*q.transpose()<=0 for q in polycone)
     
     #@timeit
-    def FindRoots(s):
+    def FindRoots(s, max_roots=None, max_decompositions=None):
+        """Enumerate roots until the fundamental polyhedron closes, or a bound is hit.
+
+        Returns True when the polyhedron was established (the algorithm's own
+        termination criterion, finite covolume), False when a bound stopped the
+        search first. s.complete and s.truncated record the same outcome.
+
+        Unbounded by default, so existing callers are unaffected. Bounds matter
+        because the criterion can never be met for some input -- signature (1,1)
+        being the extreme case, where the domain is a half-line in H^1 and so has
+        infinite volume, yet has only ONE face. There the roots are found at once
+        and the search then runs forever waiting for a condition that cannot
+        arrive; a bound returns the faces actually found.
+        """
         s.roots = s.FundCone()
-        for root in s.NextRoot():
+        s.complete = False
+        s.truncated = False
+        for root in s.NextRoot(max_decompositions):
             s.roots.append(root)
-            #print('roots found: {0}, they are:\n{1}'.format(len(s.roots),s.roots))
             if s.is_FundPoly():
                 s.print_roots()
-                return
+                s.complete = True
+                return True
+            if max_roots is not None and len(s.roots) >= max_roots:
+                s.truncated = True
+                return False
+        s.truncated = not s.complete
+        return s.complete
 
     def print_roots(s):
         polycone=[matrix(s.M.inverse()*a) for a in Cone(s.roots).dual().rays()]
@@ -191,8 +211,13 @@ class VinAl:
             if stop == 0:
                 return
 
-    def NextRoot(s):
+    def NextRoot(s, max_decompositions=None):
+      examined = 0
       for a, k in s.IterateRootDecompositions():
+        examined += 1
+        if max_decompositions is not None and examined > max_decompositions:
+            s.truncated = True
+            return
           #print(a, k, -a.inner_product(s.v0)/math.sqrt(k))
         new_roots = [v for v in s.Roots_decomposed_into(a, k) if s.IsNewRoot(v)]
         if len(new_roots)>0:

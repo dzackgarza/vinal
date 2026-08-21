@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=80"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "vinal"
+version = "0.1.0"
+requires-python = ">=3.14"
+dependencies = [
+  "numpy",
+  "scipy",
+]
+
+[tool.setuptools]
+package-dir = { "" = "src/sage" }
+py-modules = ["coxiter", "qsolve", "vinal"]

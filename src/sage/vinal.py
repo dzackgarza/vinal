@@ -11,14 +11,24 @@ import coxiter
 
 
 def GetIntegerPoints(m):
-    n = len(m.rows()[0])
-    negative = [sum(v[i] for v in m.rows() if v[i]<0) for i in range(n)]
-    positive = [sum(v[i] for v in m.rows() if v[i]>0) for i in range(n)]
-    BoundingBox = itertools.product(*[range(negative[i],positive[i]+1) for i in range(len(negative))])
-    def ParallelepipedContains(v):#v is a row, m is a matrix with polytope generators as rows
-        Q = matrix(v)*m.inverse()
-        return all( (c < 1) and (c>=0) for c in Q.list())
-    return [v for v in BoundingBox if ParallelepipedContains(v)]
+    """Integer points in the half-open row fundamental parallelepiped.
+
+    Enumerate the finite quotient using row Hermite normal form, rather
+    than searching an ambient coordinate bounding box.  Each quotient
+    representative is reduced into the original parallelepiped exactly.
+    """
+    m = matrix(ZZ, m)
+    if not m.is_square() or m.det() == 0:
+        raise ValueError("fundamental parallelepiped requires a nonsingular square matrix")
+    h = m.hermite_form()
+    diagonal = [ZZ(h[i, i]) for i in range(m.nrows())]
+    inverse = m.inverse()
+    result = []
+    for coordinates in itertools.product(*(range(d) for d in diagonal)):
+        fractional = vector(QQ, coordinates) * inverse
+        fractional = vector(QQ, (x - floor(x) for x in fractional))
+        result.append(tuple(ZZ(x) for x in fractional * m))
+    return result
 
 
 

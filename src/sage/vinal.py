@@ -10,12 +10,11 @@ import coxiter
 
 
 
-def GetIntegerPoints(m):
-    """Integer points in the half-open row fundamental parallelepiped.
+def IterateIntegerPoints(m):
+    """Iterate the integer representatives of a row fundamental domain.
 
-    Enumerate the finite quotient using row Hermite normal form, rather
-    than searching an ambient coordinate bounding box.  Each quotient
-    representative is reduced into the original parallelepiped exactly.
+    The Hermite normal form indexes the finite quotient; the inverse
+    maps each class into the half-open domain using exact arithmetic.
     """
     m = matrix(ZZ, m)
     if not m.is_square() or m.det() == 0:
@@ -23,12 +22,15 @@ def GetIntegerPoints(m):
     h = m.hermite_form()
     diagonal = [ZZ(h[i, i]) for i in range(m.nrows())]
     inverse = m.inverse()
-    result = []
     for coordinates in itertools.product(*(range(d) for d in diagonal)):
         fractional = vector(QQ, coordinates) * inverse
         fractional = vector(QQ, (x - floor(x) for x in fractional))
-        result.append(tuple(ZZ(x) for x in fractional * m))
-    return result
+        yield tuple(ZZ(x) for x in fractional * m)
+
+
+def GetIntegerPoints(m):
+    """List the integer points of the half-open row parallelepiped."""
+    return list(IterateIntegerPoints(m))
 
 
 

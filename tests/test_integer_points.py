@@ -1,6 +1,6 @@
 from itertools import product
 from sage.all import ZZ, matrix
-from vinal import GetIntegerPoints
+from vinal import GetIntegerPoints, IterateIntegerPoints
 
 
 def test_fundamental_parallelepipeds():
@@ -33,3 +33,8 @@ def test_vinal_deferred_cosets():
     assert deferred.W == []
     assert eager.V1 == deferred.V1
     assert eager.root_lengths == deferred.root_lengths
+
+
+def test_streaming_agrees_with_materialization():
+    m = matrix(ZZ, [[3, 5], [1, 4]])
+    assert list(IterateIntegerPoints(m)) == GetIntegerPoints(m)

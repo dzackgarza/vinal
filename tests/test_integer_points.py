@@ -20,3 +20,16 @@ def test_fundamental_parallelepipeds():
         for point in points:
             coefficients = matrix(ZZ, [point]) * inverse
             assert all(0 <= x < 1 for x in coefficients.list())
+
+
+def test_vinal_deferred_cosets():
+    from sage.all import vector
+    from vinal import VinAl
+
+    gram = matrix(ZZ, [[-2, 0], [0, 2]])
+    v0 = vector(ZZ, [1, 0])
+    eager = VinAl(gram, v0, output=None)
+    deferred = VinAl(gram, v0, output=None, initialize_cosets=False)
+    assert deferred.W == []
+    assert eager.V1 == deferred.V1
+    assert eager.root_lengths == deferred.root_lengths

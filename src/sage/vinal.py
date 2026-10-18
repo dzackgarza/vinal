@@ -49,7 +49,7 @@ def NegativeVector(V):
 
             
 class VinAl:
-    def __init__(s, M, v0=None, use_coxiter=False, output=sys.stdout):
+    def __init__(s, M, v0=None, use_coxiter=False, output=sys.stdout, initialize_cosets=True):
         s.output = output
         s.use_coxiter = use_coxiter
         s.M = M
@@ -65,8 +65,8 @@ class VinAl:
         s.M1 = s.V1.gram_matrix()
         #s.mu = (sorted(s.M1.eigenvalues()))[0]
         
-        s.W=[s.V(w) for w in GetIntegerPoints(s.V1.matrix().insert_row(s.n-1, s.v0))] # w_1..w_m
-        s.W.sort(key = lambda x: -s.v0.inner_product(x))
+        s.W = [s.V(w) for w in GetIntegerPoints(s.V1.matrix().insert_row(s.n-1, s.v0))] if initialize_cosets else []
+        s.W.sort(key=lambda x: -s.v0.inner_product(x))
 
         s.En=abs(s.M.det()/GCD_list(s.M.adjugate().list()))
         s.root_lengths = [k for k in range(1,2*s.En+1) if ((2*s.En)%k == 0)]
